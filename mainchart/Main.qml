@@ -41,8 +41,8 @@ Window {
         property bool collapes: false
         property bool animationComplete: true
         visible: true
-        property double yMaximum: 40
-        property double yMinimum: 120
+        property double yMaximum: 120
+        property double yMinimum: 40
 
         function changVisible() {
             if (collapes == false && visible == true
@@ -68,13 +68,13 @@ Window {
         }
 
         function toYPixels(y) {
-            return -plot.height / (yMaximum - yMinimum) * (y - yMinimum) + plot.height
+            return plot.height - ((y - yMinimum) / (yMaximum - yMinimum) * plot.height)
         }
 
-        property double xMaximum: 0
-        property double xMinimum: 100
+        property double xMaximum: 100
+        property double xMinimum: 0
         function toXPixels(x) {
-            return plot.width / (xMaximum - xMinimum) * (x - xMinimum)
+            return (x - xMinimum) / (xMaximum - xMinimum) * plot.width
         }
 
         Behavior on height {
@@ -105,9 +105,8 @@ Window {
                 var context = getContext("2d")
                 context.clearRect(0, 0, plot.width,
                                   plot.height) // new points data (animation)
-                //context.strokeStyle = color
                 context.lineWidth = 4
-                context.beginPath()
+
                 for (var i = 0; i < myList.length; i++) {
                     context.beginPath()
                     context.strokeStyle = myList[i].lineColor
@@ -126,22 +125,4 @@ Window {
             }
         }
     }
-
-    // function test() {
-    //     for (var i = 0; i < myList.length; i++) {
-    //         console.log(myList[i].linePoints.length)
-
-    //         for (var k = 0; k < myList[i].linePoints.length; k++) {
-
-    //             var pointF = myList[i].linePoints[k]
-    //             console.log(pointF.x)
-    //             console.log(pointF.y)
-    //         }
-    //     }
-    // }
-
-    // Component.onCompleted: {
-
-    //     // test()
-    // }
 }

@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QDebug>
 #include <QObject>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -24,6 +25,8 @@ int main(int argc, char *argv[])
 
     QList<PointList> arrayList;
 
+    int lastCategory = 0;
+
     PointList pArrayList1;
     pArrayList1.lineColor = "#787878";
 
@@ -39,23 +42,80 @@ int main(int argc, char *argv[])
         pStruct.setX(X_MIN + i * x_step);
         pStruct.setY(amplitude * sin(2 * M_PI * pStruct.x() / (X_MAX / 2)) + offset);
 
-        if (i < 3000) {
-            pArrayList1.linePoints.append(pStruct);
+        qDebug() << "x:" << pStruct.x() << "y:" << pStruct.y();
+
+        if (i == 0) {
+            if (40 <= pStruct.y() && pStruct.y() < 80) {
+                lastCategory = 1;
+            } else if (80 <= pStruct.y() && pStruct.y() < 100) {
+                lastCategory = 2;
+            } else if (100 <= pStruct.y()) {
+                lastCategory = 3;
+            }
         }
 
-        if (3000 < i && i < 6000) {
-            pArrayList2.linePoints.append(pStruct);
-        }
-
-        if (6000 < i) {
-            pArrayList3.linePoints.append(pStruct);
+        if (40 <= pStruct.y() && pStruct.y() < 80) {
+            if (lastCategory == 1) {
+                pArrayList1.linePoints.append(pStruct);
+            } else {
+                if (lastCategory == 2 && pArrayList2.linePoints.length() > 1) {
+                    arrayList.append(pArrayList2);
+                    pArrayList2.linePoints.clear();
+                } else if (lastCategory == 3 && pArrayList3.linePoints.length() > 1) {
+                    arrayList.append(pArrayList3);
+                    pArrayList3.linePoints.clear();
+                }
+                pArrayList1.linePoints.append(pStruct);
+                lastCategory = 1;
+            }
+        } else if (80 <= pStruct.y() && pStruct.y() < 100) {
+            if (lastCategory == 2) {
+                pArrayList2.linePoints.append(pStruct);
+            } else {
+                if (lastCategory == 1 && pArrayList1.linePoints.length() > 1) {
+                    arrayList.append(pArrayList1);
+                    pArrayList1.linePoints.clear();
+                } else if (lastCategory == 3 && pArrayList3.linePoints.length() > 1) {
+                    arrayList.append(pArrayList3);
+                    pArrayList3.linePoints.clear();
+                }
+                pArrayList2.linePoints.append(pStruct);
+                lastCategory = 2;
+            }
+        } else if (100 <= pStruct.y()) {
+            if (lastCategory == 3) {
+                pArrayList3.linePoints.append(pStruct);
+            } else {
+                if (lastCategory == 1 && pArrayList1.linePoints.length() > 1) {
+                    arrayList.append(pArrayList1);
+                    pArrayList1.linePoints.clear();
+                } else if (lastCategory == 2 && pArrayList2.linePoints.length() > 1) {
+                    arrayList.append(pArrayList2);
+                    pArrayList2.linePoints.clear();
+                }
+                pArrayList3.linePoints.append(pStruct);
+                lastCategory = 3;
+            }
         }
     }
 
+    // 添加最后一组点到 arrayList
+    if (lastCategory == 1 && pArrayList1.linePoints.length() > 1) {
+        arrayList.append(pArrayList1);
+    } else if (lastCategory == 2 && pArrayList2.linePoints.length() > 1) {
+        arrayList.append(pArrayList2);
+    } else if (lastCategory == 3 && pArrayList3.linePoints.length() > 1) {
+        arrayList.append(pArrayList3);
+    }
+
+    qDebug() << "size:" << arrayList.length();
+
+    for (int i{0}; i < arrayList.length(); i++) {
+        qDebug() << "color:" << arrayList[i].lineColor;
+        qDebug() << "child list size:" << arrayList[i].linePoints.length();
+    }
+
     QQmlApplicationEngine engine;
-    arrayList.append(pArrayList1);
-    arrayList.append(pArrayList2);
-    arrayList.append(pArrayList3);
 
     engine.rootContext()->setContextProperty("myList", QVariant::fromValue(arrayList));
 
