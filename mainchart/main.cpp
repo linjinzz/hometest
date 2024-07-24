@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
         pStruct.setX(X_MIN + i * x_step);
         pStruct.setY(amplitude * sin(2 * M_PI * pStruct.x() / (X_MAX / 2)) + offset);
 
-        qDebug() << "x:" << pStruct.x() << "y:" << pStruct.y();
+        // qDebug() << "x:" << pStruct.x() << "y:" << pStruct.y();
 
         if (i == 0) {
             if (40 <= pStruct.y() && pStruct.y() < 80) {
