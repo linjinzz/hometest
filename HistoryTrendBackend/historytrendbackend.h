@@ -1,5 +1,6 @@
 #ifndef HISTORYTRENDBACKEND_H
 #define HISTORYTRENDBACKEND_H
+
 #include <QObject>
 #include <QPointF>
 #include <QQmlEngine>
@@ -10,15 +11,15 @@ class PlotPoint : public QObject
     QML_ELEMENT
 
 public:
-    explicit PlotPoint(QObject *parent = nullptr);
+    explicit PlotPoint(QObject *parent = nullptr){};
 
     Q_PROPERTY(QString lineColor READ GetLineColor CONSTANT)
-    Q_PROPERTY(type linePointList READ GetLinePointList FINAL CONSTANT)
+    Q_PROPERTY(QList<QPointF> linePointList READ GetLinePointList FINAL CONSTANT)
+
+    QString GetLineColor() const { return lineColor; }
+    QList<QPointF> GetLinePointList() const { return linePointList; }
 
 private:
-    QString &GetLineColor() { return lineColor; };
-    QList<QPointF> &GetLinePointList() { return linePointList; };
-
     QString lineColor;
     QList<QPointF> linePointList;
 };
@@ -29,7 +30,7 @@ class HistoryTrendBackend : public QObject
     QML_ELEMENT
 
     Q_PROPERTY(qreal plotWidth READ GetPlotWidth FINAL CONSTANT)
-    Q_PROPERTY(qreal plotHeight READ GetPlotHeidth FINAL CONSTANT)
+    Q_PROPERTY(qreal plotHeight READ GetPlotHeight FINAL CONSTANT)
     Q_PROPERTY(QList<PlotPoint> plotLineList READ GetPlotLineList FINAL CONSTANT)
 
 public:
@@ -39,14 +40,14 @@ signals:
     void updatePlot(double offset);
 
 public:
-    qreal GetPlotWidth() const { return plotWidth; };
-    qreal GetPlotHeidth() const { return plotHeight; };
-    QList<PlotPoint> &GetPlotLineList() { return plotLineList; };
+    qreal GetPlotWidth() const { return plotWidth; }
+    qreal GetPlotHeight() const { return plotHeight; }
+    QList<PlotPoint> GetPlotLineList() const { return plotLineList; }
 
 private:
-    const qreal plotWidth{0};
-    const qreal plotHeight{0};
-    QList<PlotPoint> plotLineList{};
+    const qreal plotWidth{669.396};
+    const qreal plotHeight{59};
+    QList<PlotPoint> plotLineList;
 };
 
 #endif // HISTORYTRENDBACKEND_H
