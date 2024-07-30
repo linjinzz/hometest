@@ -15,15 +15,14 @@ Window {
         anchors.topMargin: 100
 
         onClicked: {
-
-            //     for (var i; i < historyTrendBackend.plotLineList.length; i++) {
-            //         var lineList = historyTrendBackend.plotLineList[i]
-            //         for (var j; j < lineList.length; j++) {
-            //             var p = lineList[j]
-            //             console.log("x的值为" + p.x)
-            //             console.log("y的值为" + p.y)
-            //         }
-            //     }
+            console.log(123)
+            for (var i = 0; i < historyTrendBackend.plotLineList.length; i++) {
+                console.log(historyTrendBackend.plotLineList[i].linePointList.length)
+                for (var j = 0; j < historyTrendBackend.plotLineList[i].linePointList.length; j++) {
+                    console.log("x的值为" + historyTrendBackend.plotLineList[i].linePointList[j].x)
+                    console.log("y的值为" + historyTrendBackend.plotLineList[i].linePointList[j].y)
+                }
+            }
         }
     }
 
