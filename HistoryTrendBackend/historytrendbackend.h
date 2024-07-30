@@ -5,13 +5,13 @@
 #include <QPointF>
 #include <QQmlEngine>
 
-class PlotPoint : public QObject
+class PlotLine : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
 
 public:
-    explicit PlotPoint(QObject *parent = nullptr){};
+    explicit PlotLine(QObject *parent = nullptr){};
 
     Q_PROPERTY(QString lineColor READ GetLineColor CONSTANT)
     Q_PROPERTY(QList<QPointF> linePointList READ GetLinePointList FINAL CONSTANT)
@@ -31,7 +31,7 @@ class HistoryTrendBackend : public QObject
 
     Q_PROPERTY(qreal plotWidth READ GetPlotWidth FINAL CONSTANT)
     Q_PROPERTY(qreal plotHeight READ GetPlotHeight FINAL CONSTANT)
-    Q_PROPERTY(QList<PlotPoint> plotLineList READ GetPlotLineList FINAL CONSTANT)
+    Q_PROPERTY(QList<PlotLine> plotLineList READ GetPlotLineList FINAL CONSTANT)
 
 public:
     explicit HistoryTrendBackend(QObject *parent = nullptr);
@@ -42,12 +42,12 @@ signals:
 public:
     qreal GetPlotWidth() const { return plotWidth; }
     qreal GetPlotHeight() const { return plotHeight; }
-    QList<PlotPoint> GetPlotLineList() const { return plotLineList; }
+    QList<PlotLine> GetPlotLineList() const { return plotLineList; }
 
 private:
     const qreal plotWidth{669.396};
     const qreal plotHeight{59};
-    QList<PlotPoint> plotLineList;
+    QList<PlotLine> plotLineList;
 };
 
 #endif // HISTORYTRENDBACKEND_H

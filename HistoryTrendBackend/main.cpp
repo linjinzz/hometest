@@ -7,14 +7,16 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     HistoryTrendBackend backend{};
-    //PlotLine pLine;
+    // PlotLine pLine;
+    // pLine.lineColor = "lightblue";
 
-    // for(int i{0};i <100; i++){
-    //     QPointF point(i,i+);
+    // for (int i{0}; i < 100; i++) {
+    //     QPointF point(i, i + 1);
 
-    //     pLine.
-
+    //     pLine.linePointList.push_back(point);
     // }
+
+    // backend.plotLineList.push_back(pLine);
 
     QQmlApplicationEngine engine;
 
