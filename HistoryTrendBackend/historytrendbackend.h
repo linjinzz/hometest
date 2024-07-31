@@ -37,7 +37,7 @@ public:
     explicit HistoryTrendBackend(QObject *parent = nullptr);
 
 signals:
-    void updatePlot(double offset);
+    //void updatePlot(double offset);
     void timeIntervalChanged(int interval);
 
 public slots:
@@ -56,9 +56,13 @@ public:
     int timeInteval{6};
 
     double widthOfPerSec{timeInteval * 60 * 60 / plotWidth};
-    QList<PlotLine> plotLineList;
+    QList<PlotLine> plotLineList{};
+    QList<QPoint> showedPointList{};
+    QList<QPointF> totalPointList{};
 
     void generatingData();
+    void filterData();
+    void updatePlot(double scrolloffset);
 };
 
 #endif // HISTORYTRENDBACKEND_H
