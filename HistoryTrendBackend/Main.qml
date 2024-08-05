@@ -15,14 +15,7 @@ Window {
         anchors.topMargin: 100
 
         onClicked: {
-            for (var i = 0; i < historyTrendBackend.plotLineList.length; i++) {
-                console.log(historyTrendBackend.plotLineList[i].linePointList.length)
-                for (var j = 0; j < historyTrendBackend.plotLineList[i].linePointList.length; j++) {
 
-                    console.log("x的值为" + historyTrendBackend.plotLineList[i].linePointList[j].x)
-                    console.log("y的值为" + historyTrendBackend.plotLineList[i].linePointList[j].y)
-                }
-            }
         }
     }
 

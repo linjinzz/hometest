@@ -23,9 +23,9 @@ void HistoryTrendBackend::generatingData()
         double angle = 2 * PI * FREQUENCY * xPos;
         double value = AMPLITUDE * std::sin(angle) + OFFSET;
 
-        QTime time{i / (60 * 60), (i % (60 * 60)) / 60, i % 60, 0};
+        QTime time = QTime::fromMSecsSinceStartOfDay(i * 1000);
 
-        //qDebug() << "time: " << time << " y: " << value;
+        //qDebug() << "current point time" << time;
 
         totalPointList.push_back(PointData{time, value});
     }
@@ -33,7 +33,6 @@ void HistoryTrendBackend::generatingData()
 
 void HistoryTrendBackend::filterData(int leftRange, int rightRange)
 {
-    //qDebug() << "每秒间隔宽度" << widthOfPerSec;\
 
     QTime firstTime = QTime::currentTime();
 
@@ -77,12 +76,12 @@ void HistoryTrendBackend::filterData(int leftRange, int rightRange)
         qreal xPos = secon * widthOfPerSec;
         qreal yPos = plotHeight - (pointData.y - 40) / (120 - 40) * plotHeight;
 
-        //qDebug() << "x: " << xPos << "y: " << yPos;
-
-        //qDebug() << "x: " << xPos << "y: " << yPos;
-
         if (targetList != currentList && currentList != nullptr
             && !currentList->linePointList.isEmpty()) {
+            currentList->recWidth = currentList->linePointList.last().x()
+                                    - currentList->linePointList.first().x();
+            currentList->leftMargin = currentList->linePointList.first().x();
+
             plotLineList.append(*currentList);
             currentList->linePointList.clear();
         }
@@ -100,34 +99,29 @@ void HistoryTrendBackend::filterData(int leftRange, int rightRange)
     }
 
     QTime lastTime = QTime::currentTime();
-
-    // qDebug() << "firstTime" << firstTime;
-    // qDebug() << "lastTime" << lastTime;
-
-    // qDebug() << "花费时间" << firstTime.msecsTo(lastTime);
 }
 
 void HistoryTrendBackend::updatePlot(double scrolloffset)
 {
-    QTime firstTime = QTime::currentTime();
-    double interval = (std::abs(scrolloffset) / plotWidth) * 6 * 60 * 60;
+    double interval = (scrolloffset / plotWidth) * 6 * 60 * 60;
 
-    //qDebug() << "当前移动秒数: " << interval;
+    QTime leftRangeLimit{0, 0, 0, 0};
+    QTime righRnageLimit{12, 0, 0, 0};
 
-    leftRangeTime = leftRangeTime.addSecs(interval);
-    rightRangeTime = rightRangeTime.addSecs(interval);
+    int leftRangeTimeToSecond = leftRangeTime.msecsSinceStartOfDay() / 1000;
 
-    // // if (QTime{0, 0, 0, 0} < leftRangeTime.addSecs(interval)) {
-    //     leftRangeTime = QTime{0, 0, 0, 0};
-    // // } else {
-    //     leftRangeTime = leftRangeTime.addSecs(interval);
-    // }
+    int rightRangeTimeToSecond = rightRangeTime.msecsSinceStartOfDay() / 1000;
 
-    // if (QTime{12, 0, 0, 0} < rightRangeTime.addSecs(interval)) {
-    //     rightRangeTime = QTime{12, 0, 0, 0};
-    // } else {
-    //     rightRangeTime = rightRangeTime.addSecs(interval);
-    // }
+    if ((leftRangeTimeToSecond + interval) <= 0) {
+        leftRangeTime = leftRangeLimit;
+        rightRangeTime = rightRangeTime.addSecs(-leftRangeTimeToSecond);
+    } else if ((rightRangeTimeToSecond + interval) >= righRnageLimit.msecsSinceStartOfDay() / 1000) {
+        rightRangeTime = righRnageLimit;
+        leftRangeTime = leftRangeTime.addSecs(rightRangeTime.secsTo(righRnageLimit));
+    } else {
+        leftRangeTime = leftRangeTime.addSecs(interval);
+        rightRangeTime = rightRangeTime.addSecs(interval);
+    }
 
     int leftRange{0};
     int righRange{0};
@@ -143,20 +137,13 @@ void HistoryTrendBackend::updatePlot(double scrolloffset)
             }
         }
 
-        if (rightRangeTime < totalPointList[i].x) {
+        if (rightRangeTime <= totalPointList[i].x || i == totalPointList.length() - 1) {
             righRange = i;
             break;
         }
     }
 
-    //qDebug() << leftRange << righRange;
-
     filterData(leftRange, righRange);
 
-    QTime lastTime = QTime::currentTime();
-
-    // qDebug() << "firstTime" << firstTime;
-    // qDebug() << "lastTime" << lastTime;
-
-    // qDebug() << "花费时间" << firstTime.msecsTo(lastTime);
+    //QTime lastTime = QTime::currentTime();
 }

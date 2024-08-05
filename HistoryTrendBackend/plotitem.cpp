@@ -5,37 +5,33 @@ PlotItem::PlotItem() {}
 
 void PlotItem::setData(const QList<PlotLine> &lineList)
 {
-    QTime lastTime = QTime::currentTime();
-
     plotLineList = lineList;
 
-    QTime secondTime = QTime::currentTime();
-    qDebug() << "setData 花费时间: " << lastTime.msecsTo(secondTime);
-
+    QTime lastTime = QTime::currentTime();
     update();
 
-    // QTime thirdTime = QTime::currentTime();
-    // qDebug() << "paint 花费时间: " << secondTime.msecsTo(thirdTime);
+    QTime secondTime = QTime::currentTime();
+    qDebug() << "paint 花费时间: " << lastTime.msecsTo(secondTime);
+    qDebug() << "      ";
 }
 
 void PlotItem::paint(QPainter *painter)
 {
-    //QColor backgroundColor = QColor("#E8E8E8").darker(30); // 100 + 30% = 130
-    painter->fillRect(boundingRect(), QColor("#E8E8E8"));
-    painter->setRenderHint(QPainter::Antialiasing); // 只需设置一次
+    static const QColor backgroundColor = QColor(
+        "#E8E8E8"); // Set background color as static for efficiency
+    static const QPen defaultPen(QColor(Qt::black), 4); // Default pen with color and width
 
-    QPen pen;
-    pen.setWidth(4); // 假设所有线宽都一样，如果不同，可以在循环内设置
+    painter->fillRect(boundingRect(), backgroundColor);
+    painter->setRenderHint(QPainter::Antialiasing);
 
     for (const auto &line : plotLineList) {
-        pen.setColor(line.lineColor); // 设置颜色
-        painter->setPen(pen);         // 将笔设置给 QPainter
+        QPen pen = defaultPen;        // Use the default pen
+        pen.setColor(line.lineColor); // Set line color
+
+        painter->setPen(pen);
 
         QPainterPath path;
-        path.moveTo(line.linePointList[0]);
-        for (int i = 1; i < line.linePointList.size(); ++i) {
-            path.lineTo(line.linePointList[i]);
-        }
+        path.addPolygon(QPolygonF(line.linePointList)); // Construct path with all points at once
 
         painter->drawPath(path);
     }
