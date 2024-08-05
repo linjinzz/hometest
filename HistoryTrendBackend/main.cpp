@@ -2,12 +2,14 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "historytrendbackend.h"
+#include "plotitem.h"
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
     HistoryTrendBackend backend{};
+    //PlotItem plot;
 
     QQmlApplicationEngine engine;
 

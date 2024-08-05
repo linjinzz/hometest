@@ -15,7 +15,6 @@ Window {
         anchors.topMargin: 100
 
         onClicked: {
-            console.log(123)
             for (var i = 0; i < historyTrendBackend.plotLineList.length; i++) {
                 console.log(historyTrendBackend.plotLineList[i].linePointList.length)
                 for (var j = 0; j < historyTrendBackend.plotLineList[i].linePointList.length; j++) {
@@ -27,50 +26,16 @@ Window {
         }
     }
 
-    Rectangle {
+    PlotItem {
         id: plot
         anchors.centerIn: parent
-
-        color: Qt.lighter("#E8E8E8", 0.3)
 
         width: historyTrendBackend.plotWidth
         height: historyTrendBackend.plotHeight
 
-        Canvas {
-            id: canvas
-            anchors.fill: parent
-            antialiasing: true
-
-            renderTarget: Canvas.FramebufferObject
-            renderStrategy: Canvas.Cooperative
-            onPaint: {
-                var startTime = Date.now()
-                var context = getContext("2d")
-                context.clearRect(0, 0, plot.width, plot.height)
-                context.lineWidth = 4
-
-                for (var i = 0; i < historyTrendBackend.plotLineList.length; i++) {
-                    context.beginPath()
-                    context.strokeStyle = historyTrendBackend.plotLineList[i].lineColor
-                    for (var k = 0; k
-                         < historyTrendBackend.plotLineList[i].linePointList.length; k++) {
-                        var pointF = historyTrendBackend.plotLineList[i].linePointList[k]
-                        if (k === 0) {
-                            context.moveTo(pointF.x, pointF.y)
-                        } else {
-                            context.lineTo(pointF.x, pointF.y)
-                        }
-                    }
-                    context.stroke()
-                }
-
-                var endTime = Date.now()
-                // 记录结束时间
-                var duration = endTime - startTime
-
-                // 计算执行时间
-                console.log("onPaint 执行时间: " + duration + " 毫秒")
-            }
+        Component.onCompleted: {
+            console.log(historyTrendBackend.plotLineList)
+            setData(historyTrendBackend.plotLineList)
         }
 
         MouseArea {
@@ -81,16 +46,23 @@ Window {
             onPressed: mouse => lastX = mouse.x
 
             onPositionChanged: mouse => {
+                                   var startTime = new Date().getTime()
+
+                                   // 记录开始时间
                                    var delta = mouse.x - lastX
 
-                                   // console.log("mouse.x " + mouse.x)
-                                   // console.log("lastX " + lastX)
-                                   // console.log("move pix: " + delta
-                                   //num = num + 1
-                                   //console.log("current num " + num)
                                    historyTrendBackend.updatePlot(delta)
-                                   canvas.requestPaint()
+                                   plot.setData(
+                                       historyTrendBackend.plotLineList)
                                    lastX = mouse.x
+
+                                   var endTime = new Date().getTime()
+                                   // 记录结束时间
+                                   var executionTime = endTime - startTime
+
+                                   // 计算执行时间
+                                   console.log(
+                                       "onPositionChanged execution time: " + executionTime + " ms")
                                }
         }
     }
