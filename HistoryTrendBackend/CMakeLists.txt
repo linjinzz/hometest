@@ -18,6 +18,7 @@ qt_add_qml_module(appHistoryTrendBackend
     QML_FILES
         Main.qml
         SOURCES historytrendbackend.h historytrendbackend.cpp
+        SOURCES plotitem.h plotitem.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

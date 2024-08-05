@@ -41,7 +41,10 @@ Window {
             anchors.fill: parent
             antialiasing: true
 
+            renderTarget: Canvas.FramebufferObject
+            renderStrategy: Canvas.Cooperative
             onPaint: {
+                var startTime = Date.now()
                 var context = getContext("2d")
                 context.clearRect(0, 0, plot.width, plot.height)
                 context.lineWidth = 4
@@ -60,12 +63,20 @@ Window {
                     }
                     context.stroke()
                 }
+
+                var endTime = Date.now()
+                // 记录结束时间
+                var duration = endTime - startTime
+
+                // 计算执行时间
+                console.log("onPaint 执行时间: " + duration + " 毫秒")
             }
         }
 
         MouseArea {
             anchors.fill: parent
             property real lastX: 0
+            property int num: 0
 
             onPressed: mouse => lastX = mouse.x
 
@@ -74,7 +85,9 @@ Window {
 
                                    // console.log("mouse.x " + mouse.x)
                                    // console.log("lastX " + lastX)
-                                   // console.log("move pix: " + delta)
+                                   // console.log("move pix: " + delta
+                                   //num = num + 1
+                                   //console.log("current num " + num)
                                    historyTrendBackend.updatePlot(delta)
                                    canvas.requestPaint()
                                    lastX = mouse.x

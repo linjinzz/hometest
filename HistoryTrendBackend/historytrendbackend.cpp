@@ -33,7 +33,9 @@ void HistoryTrendBackend::generatingData()
 
 void HistoryTrendBackend::filterData(int leftRange, int rightRange)
 {
-    //qDebug() << "每秒间隔宽度" << widthOfPerSec;
+    //qDebug() << "每秒间隔宽度" << widthOfPerSec;\
+
+    QTime firstTime = QTime::currentTime();
 
     plotLineList.clear();
 
@@ -79,9 +81,6 @@ void HistoryTrendBackend::filterData(int leftRange, int rightRange)
 
         //qDebug() << "x: " << xPos << "y: " << yPos;
 
-        QPointF point{xPos, yPos};
-
-        //plot.height - ((y - yMinimum) / (yMaximum - yMinimum) * plot.height)
         if (targetList != currentList && currentList != nullptr
             && !currentList->linePointList.isEmpty()) {
             plotLineList.append(*currentList);
@@ -89,7 +88,7 @@ void HistoryTrendBackend::filterData(int leftRange, int rightRange)
         }
 
         if (targetList != nullptr) {
-            targetList->linePointList.append(point);
+            targetList->linePointList.append({xPos, yPos});
         }
 
         currentList = targetList;
@@ -99,13 +98,21 @@ void HistoryTrendBackend::filterData(int leftRange, int rightRange)
     if (currentList != nullptr && !currentList->linePointList.isEmpty()) {
         plotLineList.append(*currentList);
     }
+
+    QTime lastTime = QTime::currentTime();
+
+    // qDebug() << "firstTime" << firstTime;
+    // qDebug() << "lastTime" << lastTime;
+
+    // qDebug() << "花费时间" << firstTime.msecsTo(lastTime);
 }
 
 void HistoryTrendBackend::updatePlot(double scrolloffset)
 {
+    QTime firstTime = QTime::currentTime();
     double interval = (std::abs(scrolloffset) / plotWidth) * 6 * 60 * 60;
 
-    qDebug() << "当前移动秒数: " << interval;
+    //qDebug() << "当前移动秒数: " << interval;
 
     leftRangeTime = leftRangeTime.addSecs(interval);
     rightRangeTime = rightRangeTime.addSecs(interval);
@@ -142,7 +149,14 @@ void HistoryTrendBackend::updatePlot(double scrolloffset)
         }
     }
 
-    qDebug() << leftRange << righRange;
+    //qDebug() << leftRange << righRange;
 
     filterData(leftRange, righRange);
+
+    QTime lastTime = QTime::currentTime();
+
+    // qDebug() << "firstTime" << firstTime;
+    // qDebug() << "lastTime" << lastTime;
+
+    // qDebug() << "花费时间" << firstTime.msecsTo(lastTime);
 }
