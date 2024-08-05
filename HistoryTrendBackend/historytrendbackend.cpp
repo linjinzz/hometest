@@ -2,7 +2,10 @@
 
 HistoryTrendBackend::HistoryTrendBackend(QObject *parent)
     : QObject{parent}
-{}
+{
+    generatingData();
+    updatePlot(0);
+}
 
 void HistoryTrendBackend::generatingData()
 {
@@ -16,27 +19,130 @@ void HistoryTrendBackend::generatingData()
     int totalDataPoints = SECONDS_PER_HOUR * TOTAL_HOURS;
 
     for (int i = 0; i < totalDataPoints; ++i) {
-        double time = static_cast<double>(i); // 每秒一个数据点
-        double angle = 2 * PI * FREQUENCY * time;
+        double xPos = static_cast<double>(i); // 每秒一个数据点
+        double angle = 2 * PI * FREQUENCY * xPos;
         double value = AMPLITUDE * std::sin(angle) + OFFSET;
 
-        totalPointList.push_back(QPointF(time, value));
+        QTime time{i / (60 * 60), (i % (60 * 60)) / 60, i % 60, 0};
+
+        //qDebug() << "time: " << time << " y: " << value;
+
+        totalPointList.push_back(PointData{time, value});
     }
 }
 
-void HistoryTrendBackend::filterData() {}
+void HistoryTrendBackend::filterData(int leftRange, int rightRange)
+{
+    //qDebug() << "每秒间隔宽度" << widthOfPerSec;
+
+    plotLineList.clear();
+
+    PlotLine pArrayList1;
+    pArrayList1.lineColor = "#787878";
+
+    PlotLine pArrayList2;
+    pArrayList2.lineColor = "#FAB700";
+
+    PlotLine pArrayList3;
+    pArrayList3.lineColor = "#DE3835";
+
+    PlotLine *currentList = nullptr;
+
+    Category lastCategory = CategoryNone;
+
+    for (int i = leftRange; i <= rightRange; ++i) {
+        PointData &pointData = totalPointList[i];
+
+        Category currentCategory = categorize(pointData.y);
+        PlotLine *targetList = nullptr;
+
+        switch (currentCategory) {
+        case Category1:
+            targetList = &pArrayList1;
+            break;
+        case Category2:
+            targetList = &pArrayList2;
+            break;
+        case Category3:
+            targetList = &pArrayList3;
+            break;
+        default:
+            break;
+        }
+
+        qreal secon = leftRangeTime.secsTo(pointData.x);
+
+        qreal xPos = secon * widthOfPerSec;
+        qreal yPos = plotHeight - (pointData.y - 40) / (120 - 40) * plotHeight;
+
+        //qDebug() << "x: " << xPos << "y: " << yPos;
+
+        //qDebug() << "x: " << xPos << "y: " << yPos;
+
+        QPointF point{xPos, yPos};
+
+        //plot.height - ((y - yMinimum) / (yMaximum - yMinimum) * plot.height)
+        if (targetList != currentList && currentList != nullptr
+            && !currentList->linePointList.isEmpty()) {
+            plotLineList.append(*currentList);
+            currentList->linePointList.clear();
+        }
+
+        if (targetList != nullptr) {
+            targetList->linePointList.append(point);
+        }
+
+        currentList = targetList;
+        //lastCategory = currentCategory;
+    }
+
+    if (currentList != nullptr && !currentList->linePointList.isEmpty()) {
+        plotLineList.append(*currentList);
+    }
+}
 
 void HistoryTrendBackend::updatePlot(double scrolloffset)
 {
-    if (scrolloffset < 0) {
-        scrolloffset = std::abs(scrolloffset);
-    } else {
+    double interval = (std::abs(scrolloffset) / plotWidth) * 6 * 60 * 60;
+
+    qDebug() << "当前移动秒数: " << interval;
+
+    leftRangeTime = leftRangeTime.addSecs(interval);
+    rightRangeTime = rightRangeTime.addSecs(interval);
+
+    // // if (QTime{0, 0, 0, 0} < leftRangeTime.addSecs(interval)) {
+    //     leftRangeTime = QTime{0, 0, 0, 0};
+    // // } else {
+    //     leftRangeTime = leftRangeTime.addSecs(interval);
+    // }
+
+    // if (QTime{12, 0, 0, 0} < rightRangeTime.addSecs(interval)) {
+    //     rightRangeTime = QTime{12, 0, 0, 0};
+    // } else {
+    //     rightRangeTime = rightRangeTime.addSecs(interval);
+    // }
+
+    int leftRange{0};
+    int righRange{0};
+    bool leftInit{false};
+
+    for (int i = 0; i < totalPointList.length(); ++i) {
+        if (leftRangeTime > totalPointList[i].x) {
+            continue;
+        } else {
+            if (!leftInit) {
+                leftInit = true;
+                leftRange = i;
+            }
+        }
+
+        if (rightRangeTime < totalPointList[i].x) {
+            righRange = i;
+            break;
+        }
     }
 
-    double interval = scrolloffset * widthOfPerSec;
+    qDebug() << leftRange << righRange;
 
-    auto it = std::lower_bound(totalPointList.begin(),
-                               totalPointList.end(),
-                               interval,
-                               [](const QPointF &p, double val) { return p.y() < val; });
+    filterData(leftRange, righRange);
 }

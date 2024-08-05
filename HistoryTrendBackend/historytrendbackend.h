@@ -17,14 +17,24 @@ public:
     QList<QPointF> GetLinePointList() const { return linePointList; }
 
 public:
+    //for plot
     QString lineColor{};
+    QList<QPointF> linePointList{};
+
     double leftMargin{0};
     double recWidth{0};
-    QList<QPointF> linePointList{};
 };
 
 class HistoryTrendBackend : public QObject
 {
+    enum Category { Category1, Category2, Category3, CategoryNone };
+
+    struct PointData
+    {
+        QTime x{};
+        qreal y{};
+    };
+
     Q_OBJECT
     QML_ELEMENT
 
@@ -55,14 +65,27 @@ public:
     //hours
     int timeInteval{6};
 
-    double widthOfPerSec{timeInteval * 60 * 60 / plotWidth};
+    qreal widthOfPerSec{plotWidth / qreal(timeInteval * 60 * 60)};
     QList<PlotLine> plotLineList{};
     QList<QPoint> showedPointList{};
-    QList<QPointF> totalPointList{};
+    QList<PointData> totalPointList{};
+
+    //for canvas plot
+    QTime leftRangeTime{0, 0, 0};
+    QTime rightRangeTime{6, 0, 0};
 
     void generatingData();
-    void filterData();
-    void updatePlot(double scrolloffset);
+    void filterData(int leftRange, int rightRange);
+    Q_INVOKABLE void updatePlot(double scrolloffset);
+
+    Category categorize(qreal y)
+    {
+        if (y < 80)
+            return Category1;
+        if (y < 100)
+            return Category2;
+        return Category3;
+    }
 };
 
 #endif // HISTORYTRENDBACKEND_H
