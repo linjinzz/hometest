@@ -24,15 +24,25 @@ void PlotItem::paint(QPainter *painter)
     painter->fillRect(boundingRect(), backgroundColor);
     painter->setRenderHint(QPainter::Antialiasing);
 
-    for (const auto &line : plotLineList) {
-        QPen pen = defaultPen;        // Use the default pen
-        pen.setColor(line.lineColor); // Set line color
+    qreal itemWidth = boundingRect().width();
+    qreal itemHeight = boundingRect().height();
 
-        painter->setPen(pen);
+    // Draw a 1px height rectangle in the middle of the item
+    QRect middleRect(0, itemHeight / 2, itemWidth, 1);
+    painter->fillRect(middleRect, Qt::black);
 
-        QPainterPath path;
-        path.addPolygon(QPolygonF(line.linePointList)); // Construct path with all points at once
-
-        painter->drawPath(path);
+    // Draw vertical rectangles every 20px next to the middle rectangle
+    for (int i = 0; i < itemWidth; i += 20) {
+        QRect verticalRect(i, itemHeight / 2 + 1, 1, 4);
+        painter->fillRect(verticalRect, Qt::black);
     }
+
+    // Draw text "123" below the middle rectangle
+    QFont font = painter->font();
+    font.setPixelSize(12); // Set font size
+    painter->setFont(font);
+
+    QRect textRect = QRect(-5, 0, 20,
+                           20); // Position the text below the rectangles
+    painter->drawText(textRect, Qt::AlignCenter, "123");
 }
